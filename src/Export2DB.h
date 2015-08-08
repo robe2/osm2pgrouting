@@ -60,14 +60,15 @@ public:
  	int connect();
 
  	//! creates needed tables and geometries
- 	void createTables();
+ 	void createTables() const;
+ 	void createTempTables() const;
  	//! exports nodes to the database
- 	void exportNodes(std::map<long long, Node*>& nodes);
+ 	void exportNodes(std::map<long long, Node*>& nodes) const;
  	//! exports ways to the database
- 	void exportWays(std::vector<Way*>& ways, Configuration* config);
- 	void exportRelations(std::vector<Relation*>& relations, Configuration* config);
+ 	void exportWays(std::vector<Way*>& ways, Configuration* config) const;
+ 	void exportRelations(std::vector<Relation*>& relations, Configuration* config) const;
 
- 	void exportTypesWithClasses(std::map<std::string, Type*>& types);
+ 	void exportTypesWithClasses(std::map<std::string, Type*>& types) const;
 
  	/**
  	 * creates the topology
@@ -79,18 +80,26 @@ public:
  	 * time took circa 30 hours on an Intel Xeon 2,4 GHz with 2 GiB Ram.
  	 * But only for the streettypes "motorway", "primary" and "secondary"
  	 */
- 	void createTopology();
+ 	void createTopology() const;
  	//! Be careful! It deletes the created tables!
- 	void dropTables();
+ 	void dropTables() const;
+ 	void dropTempTables() const;
 
  private:
- 	void createTable(const std::string &sql,
+        void dropTempTable(const std::string &table) const;
+ 	void createTempTable(const std::string &sql,
 			 const std::string &msg) const;
+        void dropTable(const std::string &table) const;
+ 	bool createTable(const std::string &sql,
+			 const std::string &table,
+			 const std::string &constraint = std::string("")) const;
 	void addGeometry( const std::string &table,
                          const std::string &geometry_type) const;
         inline std::string full_table_name(const std::string &table) const {
 		return tables_prefix + table + tables_suffix;
         }
+	void fill_vertices_table(const std::string &table, const std::string &nodes_table) const;
+	void fill_source_target(const std::string &table) const;
 
 private:
 	PGconn *mycon;
@@ -106,6 +115,7 @@ private:
 	std::string create_relations_ways;
 	std::string create_way_tag;
 	std::string create_types;
+	std::string create_vertices;
 };
 
 #endif
